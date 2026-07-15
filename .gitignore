@@ -367,3 +367,33 @@ config.json
 
 # Local user tokens
 settings.json
+
+config.json
+oauth_settings.json
+settings.json
+Rat_TemporaryKey.pfx
+
+
+# --- Doug's RAT Tool Secrets ---
+config.json
+oauth_settings.json
+settings.json
+
+# --- Local machine-only files ---
+Rat_TemporaryKey.pfx
+
+# --- Visual Studio user files ---
+*.user
+*.suo
+*.userprefs
+
+# --- Build output ---
+bin/
+obj/
+
+# --- NuGet packages ---
+packages/
+
+
+
+
