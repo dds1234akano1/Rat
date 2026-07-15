@@ -9,21 +9,91 @@ using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using DiscordRPC;
 
 // This Code Was Made By Doug Only Use When Given Credits Discord: @sxriker
+// To Do Reoranize Code And Classes Make It Cleaner For me/ Add Kill Yourself Button For Larp
 
 namespace Doug_s_dc_tool
 {
     internal class Program
     {
+
+        static DiscordRPC.DiscordRpcClient rpc;
+
+        static void StartRPC()
+        {
+            rpc = new DiscordRPC.DiscordRpcClient("1527048050193862748");
+
+            rpc.Initialize();
+
+            rpc.SetPresence(new DiscordRPC.RichPresence()
+            {
+                Details = "Using Rat",
+                State = "Getting User Info",
+                Assets = new DiscordRPC.Assets()
+                {
+                    LargeImageKey = "eric_train",
+                    LargeImageText = "Rat Tool",
+                    SmallImageKey = "image",
+                    SmallImageText = "@sxriker"
+                }
+            });
+        }
+
+
+
+
+
+        public static AppSettings Settings = new AppSettings();
+
+        public class AppSettings
+        {
+            public BannerStyle BannerStyle { get; set; } = BannerStyle.PurpleBlue;
+            public ConsoleColor SolidColor { get; set; } = ConsoleColor.Cyan;
+        }
+
+        static void SaveSettings()
+        {
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
+            File.WriteAllText("settings.json", json);
+        }
+
+        static void LoadSettings()
+        {
+            if (File.Exists("settings.json"))
+            {
+                string json = File.ReadAllText("settings.json");
+                Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<AppSettings>(json);
+            }
+        }
+
+
+        public enum BannerStyle
+        {
+            PurpleBlue,
+            Rainbow,
+            SolidColor,
+            Randomized
+        }
+
+        public static BannerStyle CurrentBannerStyle = BannerStyle.PurpleBlue;
+        public static ConsoleColor SolidBannerColor = ConsoleColor.Cyan;
+
+
         static void Main(string[] args)
         {
             Console.Title = "Rat";
+
+            StartRPC();
+
             while (true)
             {
+                LoadSettings();
                 Console.Clear();
                 Banner();
                 Menu();
+
 
                 ConsoleKeyInfo input = Console.ReadKey();
                 char option = input.KeyChar;
@@ -55,8 +125,15 @@ namespace Doug_s_dc_tool
                         Credits();
                         break;
 
-                    case '7':
+                        case '7':
+                        rpc.Dispose();
                         return;
+
+
+                    case '8':
+                        SettingsMenu();
+                        break;
+
 
                 }
             }
@@ -64,24 +141,140 @@ namespace Doug_s_dc_tool
 
         static void Banner()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(@"
- .----------------.  .----------------.  .----------------. 
-| .--------------. || .--------------. || .--------------. |
-| |  _______     | || |      __      | || |  _________   | |
-| | |_   __ \    | || |     /  \     | || | |  _   _  |  | |
-| |   | |__) |   | || |    / /\ \    | || | |_/ | | \_|  | |
-| |   |  __ /    | || |   / ____ \   | || |     | |      | |
-| |  _| |  \ \_  | || | _/ /    \ \_ | || |    _| |_     | |
-| | |____| |___| | || ||____|  |____|| || |   |_____|    | |
-| |              | || |              | || |              | |
-| '--------------' || '--------------' || '--------------' |
- '----------------'  '----------------'  '----------------' 
-                 Rat - @sxriker @larppppppppppppppppp
+            switch (Settings.BannerStyle)
+            {
+                case BannerStyle.PurpleBlue:
+                    BannerPurpleBlue();
+                    break;
 
-");
+                case BannerStyle.Rainbow:
+                    BannerRainbow();
+                    break;
+
+                case BannerStyle.SolidColor:
+                    BannerSolidColor(Settings.SolidColor);
+                    break;
+
+                case BannerStyle.Randomized:
+                    BannerRandomized();
+                    break;
+            }
+        
+
+
+        Console.ResetColor();
+        }
+
+        static void BannerPurpleBlue()
+        {
+            Console.WriteLine("\u001b[38;2;180;0;255m .----------------.  .----------------.  .----------------.");
+            Console.WriteLine("\u001b[38;2;160;0;255m | .--------------. || .--------------. || .--------------. |");
+            Console.WriteLine("\u001b[38;2;140;0;255m | |  _______     | || |      __      | || |  _________   | |");
+            Console.WriteLine("\u001b[38;2;120;0;255m | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            Console.WriteLine("\u001b[38;2;100;0;255m | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            Console.WriteLine("\u001b[38;2;80;0;255m | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            Console.WriteLine("\u001b[38;2;60;0;255m | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            Console.WriteLine("\u001b[38;2;40;0;255m | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            Console.WriteLine("\u001b[38;2;20;0;255m | |              | || |              | || |              | |");
+            Console.WriteLine("\u001b[38;2;0;0;255m  '--------------' || '--------------' || '--------------' ");
+            Console.WriteLine("\u001b[38;2;0;40;255m  '----------------'  '----------------'  '----------------' ");
+            Console.WriteLine("\u001b[38;2;0;80;255m                    Rat - @sxriker @larppppppppppppppppp");
+            Console.WriteLine("\u001b[0m");
+        }
+
+        static void BannerRainbow()
+        {
+            string[] colors =
+            {
+        "\u001b[38;2;255;0;0m",
+        "\u001b[38;2;255;127;0m",
+        "\u001b[38;2;255;255;0m",
+        "\u001b[38;2;0;255;0m",
+        "\u001b[38;2;0;0;255m",
+        "\u001b[38;2;75;0;130m",
+        "\u001b[38;2;148;0;211m"
+    };
+
+            int i = 0;
+
+            void L(string t)
+            {
+                Console.WriteLine(colors[i % colors.Length] + t);
+                i++;
+            }
+
+            L(" .----------------.  .----------------.  .----------------.");
+            L(" | .--------------. || .--------------. || .--------------. |");
+            L(" | |  _______     | || |      __      | || |  _________   | |");
+            L(" | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            L(" | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            L(" | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            L(" | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            L(" | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            L(" | |              | || |              | || |              | |");
+            L("  '--------------' || '--------------' || '--------------' ");
+            L("  '----------------'  '----------------'  '----------------' ");
+            L("                    Rat - @sxriker @larppppppppppppppppp");
+
+            Console.WriteLine("\u001b[0m");
+        }
+
+        static void BannerSolidColor(ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+
+            Console.WriteLine(" .----------------.  .----------------.  .----------------.");
+            Console.WriteLine(" | .--------------. || .--------------. || .--------------. |");
+            Console.WriteLine(" | |  _______     | || |      __      | || |  _________   | |");
+            Console.WriteLine(" | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            Console.WriteLine(" | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            Console.WriteLine(" | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            Console.WriteLine(" | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            Console.WriteLine(" | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            Console.WriteLine(" | |              | || |              | || |              | |");
+            Console.WriteLine("  '--------------' || '--------------' || '--------------' ");
+            Console.WriteLine("  '----------------'  '----------------'  '----------------' ");
+            Console.WriteLine("                    Rat - @sxriker @larppppppppppppppppp");
+
             Console.ResetColor();
         }
+
+
+        static void BannerRandomized()
+        {
+            Random rng = new Random();
+
+            string RandColor()
+            {
+                int r = rng.Next(0, 256);
+                int g = rng.Next(0, 256);
+                int b = rng.Next(0, 256);
+                return $"\u001b[38;2;{r};{g};{b}m";
+            }
+
+            void L(string text)
+            {
+                Console.WriteLine(RandColor() + text);
+            }
+
+            L(" .----------------.  .----------------.  .----------------.");
+            L(" | .--------------. || .--------------. || .--------------. |");
+            L(" | |  _______     | || |      __      | || |  _________   | |");
+            L(" | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            L(" | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            L(" | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            L(" | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            L(" | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            L(" | |              | || |              | || |              | |");
+            L("  '--------------' || '--------------' || '--------------' ");
+            L("  '----------------'  '----------------'  '----------------' ");
+            L("                    Rat - @sxriker @larppppppppppppppppp");
+
+            Console.WriteLine("\u001b[0m");
+        }
+
+
+
 
         static void Menu()
         {
@@ -92,7 +285,77 @@ namespace Doug_s_dc_tool
             Console.WriteLine("5. 5 Letter Steam Username Snip");
             Console.WriteLine("6. Credits");
             Console.WriteLine("7. Exit");
+            Console.WriteLine("8. Settings");
         }
+
+        static void SettingsMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("=== Settings ===");
+            Console.WriteLine("1. Purple And Blue Gradient");
+            Console.WriteLine("2. Gay :3 Gradient");
+            Console.WriteLine("3. Solid Color");
+            Console.WriteLine("4. Back");
+            Console.WriteLine("5. Randomized (RNG Colors)");
+
+
+            Console.Write("\nChoose an option: ");
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    Settings.BannerStyle = BannerStyle.PurpleBlue;
+                    SaveSettings();
+                    break;
+
+                case "2":
+                    Settings.BannerStyle = BannerStyle.Rainbow;
+                    SaveSettings();
+                    break;
+
+                case "3":
+                    ChooseSolidColor();
+                    Settings.BannerStyle = BannerStyle.SolidColor;
+                    SaveSettings();
+                    break;
+
+                case "5":
+                    Settings.BannerStyle = BannerStyle.Randomized;
+                    SaveSettings();
+                    break;
+
+
+                default:
+                    Console.WriteLine("Invalid choice.");
+                    break;
+            }
+        }
+
+        static void ChooseSolidColor()
+        {
+            Console.Clear();
+            Console.WriteLine("Choose a color:");
+
+            foreach (var color in Enum.GetValues(typeof(ConsoleColor)))
+                Console.WriteLine("- " + color);
+
+            Console.Write("\nColor: ");
+            string input = Console.ReadLine();
+
+            if (Enum.TryParse(input, true, out ConsoleColor selected))
+            {
+                Settings.SolidColor = selected;
+                SaveSettings();   
+                Console.WriteLine("Saved!");
+            }
+            else
+            {
+                Console.WriteLine("Invalid color, keeping previous.");
+            }
+        }
+
+
 
         static async Task webhookMessage()
         {
@@ -411,9 +674,6 @@ namespace Doug_s_dc_tool
                 Console.WriteLine($"\n[+] Finished. Saved results to {fileName}");
             }
         }
+        }
+
     }
-}
-
-
-
-
