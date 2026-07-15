@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local secrets (Discord OAuth)
+config.json
+
+# Local user tokens
+settings.json
