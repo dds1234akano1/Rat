@@ -362,21 +362,38 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Sensitive files
+# Local secrets (Discord OAuth)
 config.json
+
+# Local user tokens
 settings.json
-OAuthSettings.json
-OAuthConfig.json
+
+config.json
+oauth_settings.json
+settings.json
 Rat_TemporaryKey.pfx
 
-# Build output
+
+# --- Doug's RAT Tool Secrets ---
+config.json
+oauth_settings.json
+settings.json
+
+# --- Local machine-only files ---
+Rat_TemporaryKey.pfx
+
+# --- Visual Studio user files ---
+*.user
+*.suo
+*.userprefs
+
+# --- Build output ---
 bin/
 obj/
 
-# User-specific junk
-*.user
-*.suo
-*.cache
-*.db
-*.opendb
-*.VC.db
+# --- NuGet packages ---
+packages/
+
+
+
+
