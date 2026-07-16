@@ -3,83 +3,345 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
-using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using DiscordRPC;
 
 // This Code Was Made By Doug Only Use When Given Credits Discord: @sxriker
+
+// To Do Reoranize Code And Classes Make It Cleaner For me
+
+
+
 namespace Doug_s_dc_tool
 {
     internal class Program
-    {  static void Main(string[] args)
+    {
+
+        static DiscordRPC.DiscordRpcClient rpc;
+
+        static void StartRPC()
+        {
+            rpc = new DiscordRPC.DiscordRpcClient("1527048050193862748");
+
+            rpc.Initialize();
+
+            rpc.SetPresence(new DiscordRPC.RichPresence()
+            {
+                Details = "Using Rat",
+                State = "Getting User Info",
+                Assets = new DiscordRPC.Assets()
+                {
+                    LargeImageKey = "eric_train",
+                    LargeImageText = "Rat Tool",
+                    SmallImageKey = "image",
+                    SmallImageText = "@sxriker"
+                }
+            });
+        }
+
+        static void ViewMyProfile()
+        {
+            if (string.IsNullOrEmpty(OAuthSettings.AccessToken))
+            {
+                Console.WriteLine("You are not logged in.");
+                return;
+            }
+
+            using (HttpClient client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", OAuthSettings.AccessToken);
+
+                string json = client.GetStringAsync("https://discord.com/api/users/@me").Result;
+
+                dynamic data = JsonConvert.DeserializeObject(json);
+
+                Console.WriteLine("Logged in as:");
+                Console.WriteLine("Username: " + data.username);
+                Console.WriteLine("Global Name: " + data.global_name);
+                Console.WriteLine("ID: " + data.id);
+
+                Console.WriteLine("\nPress any key to return.");
+                Console.ReadKey(true);
+            }
+        }
+
+
+
+        public static AppSettings Settings = new AppSettings();
+
+        public class AppSettings
+        {
+            public BannerStyle BannerStyle { get; set; } = BannerStyle.PurpleBlue;
+            public ConsoleColor SolidColor { get; set; } = ConsoleColor.Cyan;
+        }
+
+        static void SaveSettings()
+        {
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
+            File.WriteAllText("settings.json", json);
+        }
+
+        static void LoadSettings()
+        {
+            if (File.Exists("settings.json"))
+            {
+                string json = File.ReadAllText("settings.json");
+                Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<AppSettings>(json);
+            }
+        }
+
+
+        public enum BannerStyle
+        {
+            PurpleBlue,
+            Rainbow,
+            SolidColor,
+            Randomized
+        }
+
+        public static BannerStyle CurrentBannerStyle = BannerStyle.PurpleBlue;
+        public static ConsoleColor SolidBannerColor = ConsoleColor.Cyan;
+
+
+        static void Main(string[] args)
         {
             Console.Title = "Rat";
 
+
+            OAuthSettings.Load();
+            OAuthConfig.Load();
             StartRPC();
+            int page = 1;
+
 
             while (true)
             {
+                Config.Load();
                 LoadSettings();
                 Console.Clear();
                 Banner();
-                Menu();
+                if (page == 1)
+                    MenuPage1();
+                else if (page == 2)
+                    MenuPage2();
+
 
 
                 ConsoleKeyInfo input = Console.ReadKey();
                 char option = input.KeyChar;
                 Console.WriteLine(option);
-                switch (option)
+                if (page == 1)
                 {
-                    case '1':
-                        webhookMessage().Wait();
-                        break;
+                    switch (option)
+                    {
+                        case '1':
+                            webhookMessage().Wait();
+                            break;
 
-                    case '2':
-                        viewUserInfo();
-                        break;
+                        case '2':
+                            viewUserInfo();
+                            break;
 
-                    case '3':
-                        webhookSpam().Wait();
-                        break;
+                        case '3':
+                            webhookSpam().Wait();
+                            break;
 
-                    case '4':
-                        UsernameSniper.StartSniper(4).Wait();
-                        break;
+                        case '4':
+                            UsernameSniper.StartSniper(4).Wait();
+                            break;
 
-                    case '5':
-                        UsernameSniper.StartSniper(5).Wait();
-                        break;
+                        case '5':
+                            UsernameSniper.StartSniper(5).Wait();
+                            break;
 
-                    case '6':
-                        Credits();
-                        break;
+                        case '6':
+                            Credits();
+                            break;
 
                         case '7':
-                        rpc.Dispose();
-                        return;
+                            rpc.Dispose();
+                            return;
+
+                        case '8':
+                            SettingsMenu();
+                            break;
+
+                        case '9':
+                            if (!string.IsNullOrEmpty(OAuthSettings.AccessToken))
+                            {
+                                Console.WriteLine("Already logged in!");
+                                break;
+                            }
+                            DiscordOAuth.Login().Wait();
+                            break;
+
+                        case '0':
+                            ViewMyProfile();
+                            break;
+
+                        case 'N':
+                        case 'n':
+                            page = 2;
+                            break;
+                    }
+                }
+                else if (page == 2)
+                {
+                    switch (option)
+                    {
+                        case '1':
+                            ViewGuilds();
+                            break;
+
+                        case '2':
+                            ViewRoles();
+                            break;
+
+                        case '3':
+                            ViewFriends();
+                            break;
+
+                        case '0':
+                            page = 1;
+                            break;
+                    }
+                }
+
             }
-            }
+
+
+        }
+        static void MenuPage2()
+        {
+            Console.WriteLine("\n1. Guilds");
+            Console.WriteLine("2. Roles");
+            Console.WriteLine("3. Friends");
+            Console.WriteLine("0. Back to Page 1");
         }
 
-        static void Banner() {            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(@"
- .----------------.  .----------------.  .----------------. 
-| .--------------. || .--------------. || .--------------. |
-| |  _______     | || |      __      | || |  _________   | |
-| | |_   __ \    | || |     /  \     | || | |  _   _  |  | |
-| |   | |__) |   | || |    / /\ \    | || | |_/ | | \_|  | |
-| |   |  __ /    | || |   / ____ \   | || |     | |      | |
-| |  _| |  \ \_  | || | _/ /    \ \_ | || |    _| |_     | |
-| | |____| |___| | || ||____|  |____|| || |   |_____|    | |
-| |              | || |              | || |              | |
-| '--------------' || '--------------' || '--------------' |
- '----------------'  '----------------'  '----------------' 
-                 Rat - @sxriker @larppppppppppppppppp
-");
+        static void ViewGuilds()
+        {
+            Console.Clear();
+            Console.WriteLine("Guilds feature not implemented yet.");
+            Console.WriteLine("\nPress any key to return.");
+            Console.ReadKey(true);
+        }
+
+        static void ViewRoles()
+        {
+            Console.Clear();
+            Console.WriteLine("Roles feature not implemented yet.");
+            Console.WriteLine("\nPress any key to return.");
+            Console.ReadKey(true);
+        }
+
+        static void ViewFriends()
+        {
+            Console.Clear();
+            Console.WriteLine("Friends feature not implemented yet.");
+            Console.WriteLine("\nPress any key to return.");
+            Console.ReadKey(true);
+        }
+
+        static void Banner()
+        {
+            switch (Settings.BannerStyle)
+            {
+                case BannerStyle.PurpleBlue:
+                    BannerPurpleBlue();
+                    break;
+
+                case BannerStyle.Rainbow:
+                    BannerRainbow();
+                    break;
+
+                case BannerStyle.SolidColor:
+                    BannerSolidColor(Settings.SolidColor);
+                    break;
+
+                case BannerStyle.Randomized:
+                    BannerRandomized();
+                    break;
+            }
+
+
+
+            Console.ResetColor();
+        }
+
+        static void BannerPurpleBlue()
+        {
+            Console.WriteLine("\u001b[38;2;180;0;255m .----------------.  .----------------.  .----------------.");
+            Console.WriteLine("\u001b[38;2;160;0;255m | .--------------. || .--------------. || .--------------. |");
+            Console.WriteLine("\u001b[38;2;140;0;255m | |  _______     | || |      __      | || |  _________   | |");
+            Console.WriteLine("\u001b[38;2;120;0;255m | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            Console.WriteLine("\u001b[38;2;100;0;255m | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            Console.WriteLine("\u001b[38;2;80;0;255m | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            Console.WriteLine("\u001b[38;2;60;0;255m | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            Console.WriteLine("\u001b[38;2;40;0;255m | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            Console.WriteLine("\u001b[38;2;20;0;255m | |              | || |              | || |              | |");
+            Console.WriteLine("\u001b[38;2;0;0;255m  '--------------' || '--------------' || '--------------' ");
+            Console.WriteLine("\u001b[38;2;0;40;255m  '----------------'  '----------------'  '----------------' ");
+            Console.WriteLine("\u001b[38;2;0;80;255m                    Rat - @sxriker @larppppppppppppppppp");
+            Console.WriteLine("\u001b[0m");
+        }
+
+        static void BannerRainbow()
+        {
+            string[] colors =
+            {
+        "\u001b[38;2;255;0;0m",
+        "\u001b[38;2;255;127;0m",
+        "\u001b[38;2;255;255;0m",
+        "\u001b[38;2;0;255;0m",
+        "\u001b[38;2;0;0;255m",
+        "\u001b[38;2;75;0;130m",
+        "\u001b[38;2;148;0;211m"
+    };
+
+            int i = 0;
+
+            void L(string t)
+            {
+                Console.WriteLine(colors[i % colors.Length] + t);
+                i++;
+            }
+
+            L(" .----------------.  .----------------.  .----------------.");
+            L(" | .--------------. || .--------------. || .--------------. |");
+            L(" | |  _______     | || |      __      | || |  _________   | |");
+            L(" | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            L(" | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            L(" | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            L(" | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            L(" | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            L(" | |              | || |              | || |              | |");
+            L("  '--------------' || '--------------' || '--------------' ");
+            L("  '----------------'  '----------------'  '----------------' ");
+            L("                    Rat - @sxriker @larppppppppppppppppp");
+
+            Console.WriteLine("\u001b[0m");
+        }
+
+        static void BannerSolidColor(ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+
+            Console.WriteLine(" .----------------.  .----------------.  .----------------.");
+            Console.WriteLine(" | .--------------. || .--------------. || .--------------. |");
+            Console.WriteLine(" | |  _______     | || |      __      | || |  _________   | |");
+            Console.WriteLine(" | | |_   __ \\    | || |     /  \\     | || | |  _   _  |  | |");
+            Console.WriteLine(" | |   | |__) |   | || |    / /\\ \\    | || | |_/ | | \\_|  | |");
+            Console.WriteLine(" | |   |  __ /    | || |   / ____ \\   | || |     | |      | |");
+            Console.WriteLine(" | |  _| |  \\ \\_  | || | _/ /    \\ \\_ | || |    _| |_     | |");
+            Console.WriteLine(" | | |____| |___| | || ||____|  |____|| || |   |_____|    | |");
+            Console.WriteLine(" | |              | || |              | || |              | |");
+            Console.WriteLine("  '--------------' || '--------------' || '--------------' ");
+            Console.WriteLine("  '----------------'  '----------------'  '----------------' ");
+            Console.WriteLine("                    Rat - @sxriker @larppppppppppppppppp");
+
             Console.ResetColor();
         }
 
@@ -115,8 +377,12 @@ namespace Doug_s_dc_tool
             L("                    Rat - @sxriker @larppppppppppppppppp");
 
             Console.WriteLine("\u001b[0m");
-        } 
-       static void Menu()
+        }
+
+
+
+
+        static void MenuPage1()
         {
             Console.WriteLine("\n1. Send Webhook Message");
             Console.WriteLine("2. User Info");
@@ -126,7 +392,14 @@ namespace Doug_s_dc_tool
             Console.WriteLine("6. Credits");
             Console.WriteLine("7. Exit");
             Console.WriteLine("8. Settings");
+            Console.WriteLine("9. Login with Discord");
+            Console.WriteLine("0. View My Discord Profile");
+            Console.WriteLine("N. Next Page");
+
         }
+
+
+
 
         static void SettingsMenu()
         {
@@ -172,6 +445,8 @@ namespace Doug_s_dc_tool
             }
         }
 
+
+
         static void ChooseSolidColor()
         {
             Console.Clear();
@@ -186,7 +461,7 @@ namespace Doug_s_dc_tool
             if (Enum.TryParse(input, true, out ConsoleColor selected))
             {
                 Settings.SolidColor = selected;
-                SaveSettings();   
+                SaveSettings();
                 Console.WriteLine("Saved!");
             }
             else
@@ -458,6 +733,8 @@ namespace Doug_s_dc_tool
                 }
             }
 
+
+
             public static async Task StartSniper(int length)
             {
                 string fileName = $"Steam_{length}Letter_Available.txt";
@@ -514,4 +791,11 @@ namespace Doug_s_dc_tool
                 Console.WriteLine($"\n[+] Finished. Saved results to {fileName}");
             }
         }
-        
+
+    }
+}
+
+
+
+
+

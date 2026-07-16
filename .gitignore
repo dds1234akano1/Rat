@@ -361,3 +361,22 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Sensitive files
+config.json
+settings.json
+OAuthSettings.json
+OAuthConfig.json
+Rat_TemporaryKey.pfx
+
+# Build output
+bin/
+obj/
+
+# User-specific junk
+*.user
+*.suo
+*.cache
+*.db
+*.opendb
+*.VC.db
